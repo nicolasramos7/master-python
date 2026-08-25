@@ -27,7 +27,7 @@ The repo has real gaps for someone trying to get hired:
 | Zero tests across 15 projects | pytest from Project 1, non-negotiable, every project |
 | No type hints, no linting, no packaging | Project 1 sets up the toolchain once; reused everywhere |
 | Money stored as `float` (project 13's bank account) | Project 1 makes this the central lesson |
-| No SQL — disqualifying for most fintech/DS roles | Project 7 |
+| No reproducible pipeline, no data contracts | Project 7 |
 | No network I/O, no concurrency | Project 3 (async) and Project 6 (CPU-bound contrast) |
 | No decorators, context managers, generators, protocols | Projects 2, 3, 5 |
 | No ML, and no leakage discipline | Project 8 |
@@ -115,7 +115,7 @@ The context manager is the interesting part: `with market.as_of(date):` freezes 
 
 **Core Python skills:** generators and `yield`, the iterator protocol, `itertools`, `async` / `await`, `asyncio.gather`, `asyncio.Semaphore` for rate limiting, `httpx.AsyncClient`, exponential backoff with jitter (as a decorator — callback to Project 2), `argparse` or `typer`, the `logging` module, `pathlib`, environment-based secrets, `time.perf_counter` benchmarking.
 
-**What you build:** A CLI that pulls daily OHLCV bars for a list of tickers from a public API (Yahoo/Stooq/Alpha Vantage — anything free), writes them to Parquet or SQLite, and is **resumable and idempotent**: run it twice and nothing changes; kill it halfway and rerunning completes the job without re-fetching what it already has.
+**What you build:** A CLI that pulls daily OHLCV bars for a list of tickers from a public API (Yahoo/Stooq/Alpha Vantage — anything free), writes them to partitioned Parquet, and is **resumable and idempotent**: run it twice and nothing changes; kill it halfway and rerunning completes the job without re-fetching what it already has.
 
 `python -m ingest --tickers AAPL,MSFT,SPY --start 2015-01-01 --out data/`
 
@@ -209,32 +209,35 @@ Then Greeks: delta, gamma, vega, theta by analytic formula and again by finite d
 
 ---
 
-## Project 7 — The Analytics Warehouse (SQL + ETL)
+## Project 7 — The Reproducible Pipeline
 
 **Domain:** Data engineering — realistically 50–60% of what an entry-level "data scientist" at a fintech actually does.
 
-**Core Python skills:** SQL (joins, CTEs, window functions), SQLAlchemy Core or raw DBAPI, transactions and rollback (context managers again, now with real stakes), idempotent upserts, schema migrations, `pytest` with a temporary-database fixture, data quality checks that fail loudly, GitHub Actions CI.
+**Core Python skills:** pipeline orchestration in plain Python, `pyarrow` and partitioned Parquet, atomic writes and crash safety, idempotent recomputation, schema and data-contract validation (`pydantic` or `pandera`), content hashing for change detection, `pytest` with `tmp_path` fixtures, dependency-graph thinking, GitHub Actions CI.
 
-**What you build:** A three-layer pipeline over DuckDB or Postgres:
-- **raw** — exactly what Project 3 fetched, untouched, append-only.
-- **staging** — typed, deduplicated, timezone-normalized, with a `NOT NULL` and uniqueness constraint on `(ticker, date)`.
-- **analytics** — derived tables: daily returns, rolling metrics, a positions table from Project 5's backtest runs.
+**What you build:** A three-layer pipeline on the filesystem, each layer a directory of partitioned Parquet:
 
-Plus a validation step that halts the pipeline on contract violations: no duplicate keys, no negative volumes, no gaps longer than 5 business days, no returns above 50% in a day without a corresponding corporate action flag.
+- **raw/** — exactly what Project 3 fetched, untouched, append-only, never rewritten.
+- **staging/** — typed, deduplicated, timezone-normalized, with an enforced uniqueness contract on `(ticker, date)`.
+- **analytics/** — derived datasets: daily returns, rolling metrics, and the positions and equity curve from Project 5's backtest runs.
 
-Write the derived-metrics layer **in SQL**, not pandas — window functions (`LAG`, `LEAD`, `SUM() OVER`, `ROW_NUMBER()`) for returns and running totals. You already know how to do it in pandas; the point is to build the SQL muscle.
+A single CLI entrypoint (`python -m pipeline run --layer analytics`) that resolves which upstream layers are stale and rebuilds only those. Staleness by content hash and mtime, not by "did I remember to rerun it."
 
-**Verification hook:** The SQL-computed daily returns must match your Project 4 pandas implementation row-for-row within floating-point tolerance. Two independent implementations agreeing is real evidence; one implementation is just a guess.
+Plus a validation step that **halts the pipeline** on contract violations rather than warning: no duplicate keys, no nulls in required columns, no negative volumes, no gaps longer than 5 business days, no single-day return above 50% without a corporate-action flag. A pipeline that logs a warning and continues is a pipeline that silently ships bad numbers.
 
-**Planted trap:** Run the pipeline twice without upsert logic and watch your row count double while every downstream metric silently halves or doubles. Then fix it with `ON CONFLICT DO UPDATE` and add a test that runs the pipeline twice and asserts the row count is stable. This is the same idempotency lesson as Project 3, now with a database, and it will bite differently.
+**Verification hook:** The pipeline's analytics layer must reproduce your Project 4 in-memory pandas results row-for-row within floating-point tolerance. Two independent paths to the same number is evidence; one path is a guess. Add it as a test.
 
-**Second trap:** A transaction that partially commits. Force a failure halfway through a multi-table load and confirm you either get all of it or none of it.
+**Planted trap:** Run the pipeline twice without dedup-on-write and watch your row count double while every downstream metric silently halves or doubles — no error, no traceback, just wrong. Then fix it and add a test that runs the pipeline twice and asserts row counts are stable. Same idempotency lesson as Project 3, but here it propagates through three layers before you see it, which is exactly how it happens in real life.
 
-**Why it matters:** SQL is a hard filter. Many fintech and DS roles screen on SQL before they look at your Python, and window functions are where most candidates fall over. Being able to say "I built a three-layer warehouse with data contracts and idempotent loads" is a materially different conversation than "I've used pandas."
+**Second trap:** Partial writes across a multi-file layer. Kill the process halfway through writing the analytics layer and you get three of five partitions updated — a dataset that loads fine and is internally inconsistent. Write to a staging directory and atomically swap, so a layer is either fully old or fully new.
+
+**Third trap:** Schema drift. Add a column upstream and watch a downstream `select` silently pick up or drop it. Pin an explicit schema at each boundary and fail on mismatch.
+
+**Why it matters:** Every production pipeline gets rerun, gets killed mid-run, and gets a schema change it wasn't expecting. Handling all three is the difference between a script and a system, and it's the actual content of most junior data work. "I built a three-layer pipeline with data contracts, atomic writes, and idempotent recomputation" is a materially different conversation than "I've used pandas."
 
 **Set up CI here:** GitHub Actions running `ruff`, `mypy`, and `pytest` on every push, across all projects to date. If earlier projects fail, fix them. Green CI on a personal repo is rare enough among juniors to be a signal.
 
-**Scope warning:** This is the tightest project in the roadmap. If you're running over, cut the analytics layer to two tables. Do not cut the tests or the idempotency work — those *are* the project.
+**Scope warning:** This is the tightest project in the roadmap. If you're running over, cut the analytics layer to two datasets. Do not cut the validation step or the idempotency work — those *are* the project.
 
 ---
 
