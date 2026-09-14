@@ -17,6 +17,7 @@ class Posting:
     account: AccountId
     amount: Decimal
 
+
 @dataclass(frozen=True)
 class Transaction:
     postings: tuple[Posting, ...]
@@ -33,10 +34,12 @@ class Transaction:
         if total != 0:
             raise UnbalancedTransaction(total)
 
+
 @dataclass(frozen=True)
 class Account:
     id: AccountId
     allow_negative: bool = False
+
 
 class Ledger:
     def __init__(self) -> None:
@@ -50,7 +53,7 @@ class Ledger:
 
     def post(self, transaction: Transaction) -> None:
         for p in transaction.postings:
-            if (p.account not in self.accounts):
+            if p.account not in self.accounts:
                 raise UnknownAccount(p.account)
 
         net_change: dict[AccountId, Decimal] = {}
@@ -58,17 +61,16 @@ class Ledger:
         for p in transaction.postings:
             net_change[p.account] = net_change.get(p.account, Decimal("0")) + p.amount
 
-        for (account_id, change) in net_change.items():
+        for account_id, change in net_change.items():
             account = self.accounts[account_id]
             if account.allow_negative:
                 continue
             current = self.balance(account_id)
             projected = current + change
-            if projected < 0: 
+            if projected < 0:
                 raise InsufficientFunds(account_id, change, current)
 
         self.transactions.append(transaction)
-
 
     def balance(self, account_id: AccountId) -> Decimal:
         if account_id not in self.accounts:

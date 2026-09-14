@@ -9,7 +9,7 @@ from ledger.models import Account, Ledger, Posting, Transaction
 
 
 def test_unbalanced_postings_are_rejected() -> None:
-    #two postings that dont add to zero
+    # two postings that dont add to zero
     p1 = Posting(AccountId("ID1"), amount=Decimal("100"))
     p2 = Posting(AccountId("ID2"), amount=Decimal("-90"))
 
@@ -18,7 +18,7 @@ def test_unbalanced_postings_are_rejected() -> None:
     sample_description = "Sample Transaction"
 
     with pytest.raises(UnbalancedTransaction):
-        Transaction(postings=(p1, p2), value_date=sample_date, description = sample_description)
+        Transaction(postings=(p1, p2), value_date=sample_date, description=sample_description)
 
 
 def test_balanced_transaction_is_accepted() -> None:
@@ -31,6 +31,7 @@ def test_balanced_transaction_is_accepted() -> None:
     assert isinstance(t.postings, tuple)
     assert t.description == "Split"
     assert t.postings == (p1, p2, p3)
+
 
 def test_balanced_transaction_is_accepted_decimal_friendly() -> None:
     p1 = Posting(AccountId("ID1"), amount=Decimal("0.1"))
@@ -62,6 +63,7 @@ def test_deposit_credits_customer_and_debits_external() -> None:
     assert ledger.balance(AccountId("ALICE")) == Decimal("100")
     assert ledger.balance(AccountId("EXTERNAL")) == Decimal("-100")
 
+
 def test_statement() -> None:
     ledger = Ledger()
     ledger.open_account(Account(AccountId("EXTERNAL"), allow_negative=True))
@@ -85,6 +87,7 @@ def test_statement() -> None:
         start=Decimal("0"),
     )
     assert total == Decimal("0")
+
 
 def transfer(frm: AccountId, to: AccountId, amount: Decimal, description: str) -> Transaction:
     return Transaction(
