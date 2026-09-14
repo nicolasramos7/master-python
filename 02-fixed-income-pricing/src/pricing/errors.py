@@ -34,3 +34,12 @@ class InvalidTerm(PricingError):
     def __init__(self, years: float) -> None:
         super().__init__(f"Invalid term {years!r}: must be finite")
         self.years = years
+
+
+class PastDatedCashflow(PricingError):
+    def __init__(self, pay_date: datetime.date, valuation_date: datetime.date) -> None:
+        super().__init__(
+            f"Invalid date: cashflow date {pay_date} is previous to valuation date {valuation_date}"
+        )
+        self.pay_date = pay_date
+        self.valuation_date = valuation_date
