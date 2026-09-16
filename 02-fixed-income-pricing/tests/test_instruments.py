@@ -7,7 +7,7 @@ import pytest
 from pricing.cashflow import Cashflow
 from pricing.conventions import Compounding
 from pricing.discounting import year_fraction
-from pricing.instruments import CouponBond, Instrument, ZeroCouponBond
+from pricing.instruments import CouponBond, Instrument, ZeroCouponBond, Annuity, CashPosition, Portfolio
 from pricing.market import MarketSnapshot
 
 TODAY = datetime.date(2027, 6, 1)
@@ -129,3 +129,38 @@ def test_coupon_bond_equals_sum_of_zero_coupon_bonds() -> None:
     assert bond.price(MARKET) == pytest.approx(
         sum(z.price(MARKET) for z in zeros)
     )
+
+
+def test_annuity_cashflows_never_include_face() -> None:
+    annuity = Annuity(MATURITY, 1000.0, 0.05, 3)
+    for cf in annuity._cashflows():
+        assert cf.amount == pytest.approx(50.0)
+
+
+def test_annuity_is_cheaper_than_equivalent_coupon_bond() -> None:
+    annuity = Annuity(MATURITY, 1000.0, 0.05, 3)
+    bond = CouponBond(MATURITY, 1000.0, 0.05, 3)
+    assert annuity.price(MARKET) < bond.price(MARKET)
+
+
+def test_cash_position_is_always_worth_its_amount() -> None:
+    cash = CashPosition(200.0)
+    assert cash.price(MARKET) == 200.0
+
+
+def test_cash_position_satisfies_instrument_protocol() -> None:
+    assert isinstance(CashPosition(100.0), Instrument)
+
+
+def test_portfolio_price_equals_sum_of_parts() -> None:
+    bond = ZeroCouponBond(MATURITY, 1000.0)
+    cash = CashPosition(200.0)
+    portfolio = Portfolio([bond, cash])
+
+    assert portfolio.price(MARKET) == pytest.approx(
+        bond.price(MARKET) + cash.price(MARKET)
+    )
+
+
+def test_empty_portfolio_prices_to_zero() -> None:
+    assert Portfolio([]).price(MARKET) == 0.0

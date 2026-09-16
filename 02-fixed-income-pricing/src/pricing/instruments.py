@@ -48,3 +48,36 @@ class CouponBond:
 
     def price(self, market: MarketSnapshot) -> float:
         return sum(market.present_value(cf) for cf in self._cashflows())
+
+@dataclass(frozen=True, slots=True)
+class Annuity:
+    maturity_date: datetime.date
+    face: float
+    coupon_rate: float
+    n_periods: int
+
+    def _cashflows(self) -> list[Cashflow]:
+        cs = []
+        
+        for i in range(1, self.n_periods + 1):
+            d = self.maturity_date - relativedelta(years=(self.n_periods - i))
+            a = self.face * self.coupon_rate
+            cs.append(Cashflow(d, a))
+        return cs
+
+    def price(self, market: MarketSnapshot) -> float:
+        return sum(market.present_value(cf) for cf in self._cashflows())
+
+@dataclass(frozen=True, slots=True)
+class CashPosition:
+    amount: float
+
+    def price(self, market: MarketSnapshot) -> float:
+        return market.present_value(Cashflow(market.valuation_date, self.amount))
+
+@dataclass
+class Portfolio:
+    instruments: list[Instrument]
+
+    def price(self, market: MarketSnapshot) -> float:
+        return sum(inst.price(market) for inst in self.instruments)
