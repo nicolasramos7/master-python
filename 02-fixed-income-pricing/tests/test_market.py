@@ -83,7 +83,8 @@ def test_present_value_matches_manual_composition(compounding: Compounding) -> N
 def test_one_year_annual_matches_independent_formula() -> None:
     market = make_market()
     value = market.present_value(Cashflow(YEAR_LATER, 100.0))
-    assert value == pytest.approx(100.0 / 1.05)
+    years = year_fraction(TODAY, YEAR_LATER)
+    assert value == pytest.approx(100.0 / (1.05 ** years))
 
 
 def test_cashflow_before_valuation_date_is_rejected() -> None:

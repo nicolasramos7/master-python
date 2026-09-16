@@ -8,7 +8,7 @@ from pricing.errors import InvalidRate, InvalidTerm
 
 def year_fraction(start_date: datetime.date, end_date: datetime.date) -> float:
     days = end_date - start_date
-    return days.days / 365.0
+    return days.days / 365.25
 
 
 def discount_factor(rate: float, years: float, compounding: Compounding) -> float:

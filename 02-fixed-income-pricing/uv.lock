@@ -638,6 +638,9 @@ wheels = [
 name = "pricing"
 version = "0.1.0"
 source = { editable = "." }
+dependencies = [
+    { name = "python-dateutil" },
+]
 
 [package.dev-dependencies]
 dev = [
@@ -648,6 +651,7 @@ dev = [
 ]
 
 [package.metadata]
+requires-dist = [{ name = "python-dateutil", specifier = ">=2.9.0.post0" }]
 
 [package.metadata.requires-dev]
 dev = [

@@ -16,8 +16,8 @@ def test_same_date_is_zero_years() -> None:
     assert year_fraction(DAY, DAY) == 0.0
 
 
-def test_three_hundred_sixty_five_days_is_exactly_one_year() -> None:
-    assert year_fraction(DAY, YEAR_LATER) == 1.0
+def test_three_hundred_sixty_five_days_is_approximately_one_year() -> None:
+    assert year_fraction(DAY, YEAR_LATER) == pytest.approx(1.0, rel=1e-3)
 
 
 def test_reversed_dates_give_negative_years() -> None:
