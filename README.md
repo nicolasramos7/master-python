@@ -23,7 +23,7 @@ uv run ruff check .
 | # | Project | Date | New concepts | Verification hook | What I learned |
 |---|---------|------|--------------|-------------------|----------------|
 | 1 | [Double-Entry Ledger](01-double-entry-ledger/) | 2026-09-05 | Frozen dataclasses, `__post_init__`, dunders, `Decimal` vs `float`, custom exception hierarchy, circular imports, validate-then-mutate | `balance()` (sum of postings) must equal the final running total from `statement()`, and both must equal a hand-computed value | Float money fails intermittently: 0.1 + 0.1 - 0.2 passed while 0.1 + 0.2 - 0.3 failed. The bugs that cost time do not raise. |
-| 2 | | | | | |
+| 2 | [Fixed Income Pricing Engine](02-fixed-income-pricing) | 2026-09-21 | Protocol vs ABC, Enum + match + assert_never, context managers (@contextmanager/yield), custom decorators, lru_cache, dataclasses.replace, layered imports | A coupon bond priced as a sum of its cashflows must equal the sum of the same cashflows priced as separate zero-coupon bonds | Verifying by self-inversion (price→ytm→price) beats verifying against theory: the round-trip passed tightly while "YTM should equal 5%" failed, because my own ACT/365.25 day count means a 5% bond doesn't price to exact par. One day-count shortcut surfaced in three places. |
 
 ## Roadmap
 
