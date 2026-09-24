@@ -1,0 +1,40 @@
+[project]
+name = "options-pricing"
+version = "0.1.0"
+description = "Project 3 - European option pricing three ways, as a NumPy workout"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "numpy>=2.4.6",
+    "scipy>=1.17.1",
+]
+
+[build-system]
+requires = ["uv_build>=0.8.17,<0.9.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "mypy>=2.3.1",
+    "pytest>=9.1.1",
+    "ruff>=0.16.8",
+    "scipy-stubs>=1.17.1.5",
+]
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "UP", "B", "SIM", "NPY", "RUF"]
+
+[tool.mypy]
+strict = true
+files = ["src", "tests"]
+# Point mypy at the project venv so `uv run mypy` sees numpy and pytest.
+python_executable = ".venv/bin/python"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["options_pricing", "conftest"]
