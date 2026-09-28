@@ -1,0 +1,53 @@
+[project]
+name = "credit-risk"
+version = "0.1.0"
+description = "Project 4 - a credit default model, built wrong then right"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "numpy>=2.4.6",
+    "pandas>=3.0.6",
+    "scikit-learn>=1.9.1",
+]
+
+[build-system]
+requires = ["uv_build>=0.8.17,<0.9.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "mypy>=2.3.1",
+    "pandas-stubs>=3.0.5.260914",
+    "pytest>=9.1.1",
+    "ruff>=0.16.9",
+]
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "UP", "B", "SIM", "NPY", "PD", "RUF"]
+# sklearn's convention is capital X for a feature matrix. Keep it.
+ignore = ["N803", "N806"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["credit_risk", "conftest"]
+
+[tool.mypy]
+strict = true
+files = ["src", "tests"]
+# Point mypy at the project venv so `uv run mypy` sees numpy, pandas and sklearn.
+python_executable = ".venv/bin/python"
+
+[[tool.mypy.overrides]]
+# scikit-learn ships no type information. Treat it as Any rather than fail.
+module = ["sklearn", "sklearn.*"]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+# QuantileClipper subclasses sklearn classes, which mypy sees as Any.
+module = ["credit_risk.features"]
+disallow_subclassing_any = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
