@@ -1,68 +1,43 @@
 # Python Mastery Roadmap — Fintech & Data Science Track
 
-**Baseline assumed:** Kaggle Basic Python + Pandas. You know syntax, control flow, functions, and `read_csv` / `groupby` / `merge`. You have never shipped a project, written a test, or debugged something that ran without erroring and gave the wrong answer.
+**Baseline assumed:** Kaggle Basic Python + Pandas. You know syntax, control flow, functions, and `read_csv` / `groupby` / `merge`.
 
-**Format:** 9 projects. Each is scoped to ~6 hours of focused work — two sittings of ~3 hours. Each has a **Core** (ship this or the project doesn't count) and a **Stretch** (only if Core landed early). Do not do Stretch on the first pass of anything.
+**Format:** 9 projects, each scoped to ~6 hours of focused work (two sittings of ~3 hours). Each has a **Core** (ship this or the project doesn't count) and a **Stretch** (only if Core landed early).
 
----
-
-## What I took from the reference repo
-
-The `jaumefl/python-learning` repo does four things that most learning repos don't, and they're the reason it works. Keep all four:
-
-1. **Verification against a known answer.** From its own README: *"the simulation is only interesting once it reproduces the known answer."* Gambler's ruin prints the simulated ruin rate beside the closed-form value in the same table. Every project below has a designated **verification hook** — a quantity you can compute two independent ways that must agree. This is not optional garnish; it's the test suite before you have a test suite.
-
-2. **Silent bugs are the curriculum.** The interesting failures in that log are the ones with no traceback: `rng.integers(0, 7)` building a seven-sided die, `return 1 - tails` instead of `n - tails`, averaging signed errors so overshoots cancel and the estimator looks 100× more accurate than it is. Each project below has a **planted trap** — a specific silent wrongness the project is designed to walk you into.
-
-3. **The Caveats section.** Project 15 finds a 5.6-point weekday effect and then kills it with a standard-error argument. That instinct — *report the number, then attack it* — is worth more in a data science interview than any library knowledge. Every project README below gets a Caveats section, even when the answer is "no caveats, this is exact."
-
-4. **Compute separated from display.** Recurs in projects 12 and 14 and is the reason the benchmark script was even possible. Keep functions returning values, never printing them.
-
-## What I'm changing
-
-The repo has real gaps for someone trying to get hired:
-
-| Gap | Where it's fixed |
-|---|---|
-| Zero tests across 15 projects | pytest from Project 1, non-negotiable, every project |
-| No type hints, no linting, no packaging | Project 1 sets up the toolchain once; reused everywhere |
-| Money stored as `float` (project 13's bank account) | Project 1 makes this the central lesson |
-| No reproducible pipeline, no data contracts | Project 7 |
-| No network I/O, no concurrency | Project 3 (async) and Project 6 (CPU-bound contrast) |
-| No decorators, context managers, generators, protocols | Projects 2, 3, 5 |
-| No ML, and no leakage discipline | Project 8 |
-| Nothing deployable, no CI, no Docker | Projects 7 and 9 |
-
-Also: the reference repo's projects are ~1 day each and single-concept. Yours are 2 days and deliberately layer 2–3 concepts, because you're starting past the syntax stage.
+| # | Project | Theme |
+|---|---|---|
+| 1 | Double-Entry Ledger | OOP, money representation, testing |
+| 2 | Fixed Income Pricing Engine | Protocols vs ABCs, decorators, context managers |
+| 3 | Options Pricing: Three Ways, One Answer | NumPy vectorization, numerical methods |
+| 4 | Credit Risk Model, Built Wrong Then Right | scikit-learn pipelines, leakage discipline |
+| 5 | Async Market Data Ingestor | Generators, async I/O, idempotency |
+| 6 | Returns, Risk & the Look-Ahead Trap | pandas at depth, risk metrics |
+| 7 | Event-Driven Backtester | Architecture, testing hard things |
+| 8 | The Reproducible Pipeline | Layered storage, data contracts, CI |
+| 9 | Capstone: The Zetamac Performance Lab | Everything, on your own data |
 
 ---
+
+## Principles carried over from the reference repo
+
+1. **Verification against a known answer.** Every project has a **verification hook**: a quantity computed two independent ways that must agree.
+2. **Silent bugs are the curriculum.** Every project has a **planted trap**: a specific silent wrongness it's designed to walk you into.
+3. **The Caveats section.** Report the number, then attack it. Every README gets one.
+4. **Compute separated from display.** Functions return values; `__main__.py` prints.
 
 ## Repository conventions
 
-Mirror the reference structure, upgraded:
-
 ```
 NN-project-name/
-├── README.md              # framing question, running it, findings, caveats, concepts
-├── pyproject.toml         # from Project 1 onward
-├── src/
-│   └── package_name/      # small modules, one job each
-└── tests/
-    └── test_*.py
+├── README.md              # framing question, running it, findings, caveats, Python used
+├── pyproject.toml
+├── src/package_name/
+└── tests/test_*.py
 ```
 
-Root `README.md` keeps a **Learning Log** table, same as the reference, with one added column:
-
-| # | Project | Date | New concepts | Verification hook | What I learned |
-|---|---|---|---|---|---|
-
-The "What I learned" column is the most valuable artifact you will produce. Write it the way the reference does — first person, specific, bug-forward, naming the thing that surprised you. An interviewer who reads it learns more about you than your code does.
-
-**Git:** one branch per project, one PR into `main`, squash-merge. Write real PR descriptions. This costs 10 minutes per project and gives you a commit history that looks like an engineer's rather than a student's.
-
----
-
-# The Projects
+- One branch per project (`NN-project-name`), squash-merged into `main`. Commit bodies explain *why*, including alternatives rejected. Nothing is pushed until you say so.
+- Tooling loop before every commit: `uv run pytest`, `uv run mypy src`, `uv run ruff check .`
+- After each project: fill in its README, add a row to the root Learning Log, squash-merge, branch for the next one.
 
 ---
 
@@ -70,19 +45,17 @@ The "What I learned" column is the most valuable artifact you will produce. Writ
 
 **Domain:** Core banking / payments infrastructure.
 
-**Core Python skills:** `dataclass` (including `frozen=True`), `decimal.Decimal` and integer minor units, custom exception hierarchies, `__repr__` / `__eq__` / `__hash__`, `@property` and computed attributes, **pytest** (`fixtures`, `parametrize`, `raises`), type hints, `mypy`, `ruff`, `uv`/`pyproject.toml`.
+**Core Python skills:** `dataclass` (including `frozen=True`), `decimal.Decimal` and integer minor units, custom exception hierarchies, `__repr__` / `__eq__` / `__hash__`, `@property`, **pytest** (fixtures, `parametrize`, `raises`), type hints, `mypy`, `ruff`, `uv`/`pyproject.toml`.
 
-**What you build:** An account and transaction system where a transaction is a set of *postings* that must sum to zero. `Account`, `Posting`, `Transaction`, `Ledger`. Deposits, withdrawals, transfers between accounts, and a statement generator. Balances are derived by replaying the posting log — never stored and mutated.
+**What you build:** An account and transaction system where a transaction is a set of *postings* that must sum to zero: `Account`, `Posting`, `Transaction`, `Ledger`. Deposits, withdrawals, transfers, and a statement generator. Balances are derived by replaying the posting log, never stored and mutated.
 
-**Verification hook:** Two independent balance computations must agree — (a) sum of postings for that account, (b) the running balance from replaying the log in order. And globally: `sum(all postings) == 0` after every operation. If those disagree, you have a bug, and you'll know it without a traceback.
+**Verification hook:** (a) the sum of postings for an account must equal (b) the running balance from replaying the log. Globally, `sum(all postings) == 0` after every operation.
 
-**Planted trap:** Write the first version with `float` balances, exactly as the reference repo's project 13 does. Then deposit `0.1` a hundred times and assert the balance is `10.00`. Watch it fail. Now do it with `Decimal`, then with integer cents, and write up which you'd choose for a real system and why. This is the single most reliable fintech screening question and you will have a scar to answer it with.
+**Planted trap:** Write the first version with `float` balances. Deposit `0.1` a hundred times and assert the balance is `10.00`. Watch it fail, then redo it with `Decimal` and with integer cents, and write up which you'd choose and why.
 
-**Second trap:** Make `withdraw` reject an invalid amount rather than clamp it. The reference log already learned this in gambler's ruin — *"clamping bad input to a legal value is worse than rejecting it: it hands back a confident wrong answer"* — but re-learn it where it involves money.
+**Second trap:** `withdraw` must reject invalid amounts, not clamp them. Clamping hands back a confident wrong answer.
 
-**Why it matters:** Testing habits form in project 1 or they never form. Money representation is a genuine competency filter. Double-entry is the mental model behind every ledger, payment processor, and accounting system you will ever touch, and understanding *why* balances are derived rather than stored is the intuition behind event sourcing.
-
-**Stretch:** `hypothesis` property test — for any random sequence of valid operations, the zero-sum invariant holds.
+**Stretch:** a `hypothesis` property test showing the zero-sum invariant holds for any random sequence of valid operations.
 
 ---
 
@@ -90,267 +63,252 @@ The "What I learned" column is the most valuable artifact you will produce. Writ
 
 **Domain:** Bond math, valuation, quant fundamentals.
 
-**Core Python skills:** `ABC` / `@abstractmethod` vs `typing.Protocol` (nominal vs structural typing), polymorphism, composition over inheritance, writing your own decorator with `functools.wraps`, `functools.lru_cache`, `contextlib.contextmanager`, `__enter__` / `__exit__`, `Enum`, operator dunders.
+**Core Python skills:** `ABC` vs `typing.Protocol`, polymorphism, composition over inheritance, custom decorators with `functools.wraps`, `lru_cache`, `contextlib.contextmanager`, `Enum`, operator dunders.
 
-**What you build:** An `Instrument` interface with `price(market)`. Implementations: `ZeroCouponBond`, `CouponBond`, `Annuity`, `CashPosition`. A `MarketSnapshot` holding a valuation date and a discount curve. A `Portfolio` that holds heterogeneous instruments and prices them all through the same interface. Yield-to-maturity by numerical root-finding, Macaulay and modified duration, convexity.
+**What you build:** An `Instrument` interface with `price(market)`, implemented by `ZeroCouponBond`, `CouponBond`, `Annuity`, and `CashPosition`. A `MarketSnapshot` holds a valuation date and discount curve. A `Portfolio` prices heterogeneous instruments through one interface. Also YTM by root-finding, Macaulay/modified duration, and convexity. `with market.as_of(date):` freezes the valuation date inside the block, which prevents look-ahead by design.
 
-The context manager is the interesting part: `with market.as_of(date):` freezes the valuation date for everything inside the block and restores it after. Pricing anything with a date outside the snapshot raises. This is a real pattern — it's how you structurally prevent look-ahead bias, and it makes context managers feel necessary rather than syntactic.
+**Verification hook:**
+- A coupon bond priced whole equals its cashflows priced as separate zero-coupon bonds.
+- Analytic modified duration matches bump-and-reprice.
+- Price → YTM → price round-trips.
 
-**Verification hook:** Three of them, all exact.
-- A bond priced at a yield equal to its coupon rate must price to exactly par.
-- Modified duration from the analytic formula must match numerical bump-and-reprice: `(P(y-Δ) - P(y+Δ)) / (2ΔP)`, agreeing to ~4 decimals for small Δ.
-- YTM solved numerically, fed back into the pricer, must return the original price.
+**Planted trap:** Δ too small in bump-and-reprice means floating-point cancellation; Δ too large means convexity contaminates the result. Plot the U-shaped error curve.
 
-**Planted trap:** Pick Δ too small in the bump-and-reprice and floating-point cancellation destroys the answer; pick it too large and the second-order term (convexity) contaminates it. Plot the duration error against Δ and find the U-shaped curve. This is the numerical-differentiation lesson and it generalizes to every finite-difference Greek you will ever compute.
-
-**Why it matters:** "Explain inheritance vs composition" and "when would you use an ABC over a Protocol" are standard mid-screen questions and abstract answers are obvious. Bond math is the fintech literacy test — duration and convexity separate people who've done finance from people who've done Python. Also: `lru_cache` on a pricing function that silently caches across a changed market snapshot is a great bug to have hit once.
-
-**Stretch:** Add an `FXForward` and make `Portfolio.price()` handle multi-currency.
+**Stretch:** an `FXForward` and multi-currency `Portfolio.price()`.
 
 ---
 
-## Project 3 — Async Market Data Ingestor
-
-**Domain:** Market data plumbing — genuinely what a junior engineer does in month one at a fintech.
-
-**Core Python skills:** generators and `yield`, the iterator protocol, `itertools`, `async` / `await`, `asyncio.gather`, `asyncio.Semaphore` for rate limiting, `httpx.AsyncClient`, exponential backoff with jitter (as a decorator — callback to Project 2), `argparse` or `typer`, the `logging` module, `pathlib`, environment-based secrets, `time.perf_counter` benchmarking.
-
-**What you build:** A CLI that pulls daily OHLCV bars for a list of tickers from a public API (Yahoo/Stooq/Alpha Vantage — anything free), writes them to partitioned Parquet, and is **resumable and idempotent**: run it twice and nothing changes; kill it halfway and rerunning completes the job without re-fetching what it already has.
-
-`python -m ingest --tickers AAPL,MSFT,SPY --start 2015-01-01 --out data/`
-
-**Verification hook:** Two, mirroring the reference repo's benchmark script from project 14.
-- **Idempotency:** run twice, diff the output. Byte-identical, zero duplicate `(ticker, date)` pairs. Assert it in a test.
-- **Concurrency payoff:** benchmark the sequential version against the async version across 5 / 20 / 50 tickers. Take `min()` of 3 runs, not the mean — noise only makes runs slower. Speedup should scale with ticker count until you hit your semaphore limit, then flatten. Explain the flattening.
-
-**Planted trap:** Three, all silent.
-- Timezone-naive timestamps. A bar dated `2024-03-10` from a US source and one from a European source are not the same day. Normalize to UTC on ingest or discover this in Project 4 when your correlations are garbage.
-- Adjusted vs unadjusted close. Fetch both for a stock that split, and look at the raw close on the split date. A 7-for-1 split looks like an 86% crash to any strategy reading unadjusted prices.
-- Partial writes. Kill the process mid-write and you get a truncated file that reads fine and is wrong. Write to a temp path and atomically rename.
-
-**Why it matters:** This is the async project, and asking someone to explain "when does `asyncio` help and when doesn't it" is a near-universal filter. You'll be able to answer with a benchmark you ran. The idempotency requirement is the thing that makes it real work rather than a script — every production pipeline is rerun, and pipelines that can't be safely rerun are how data engineers spend their weekends.
-
-**Stretch:** Add a `--dry-run` flag and structured JSON logging.
-
----
-
-## Project 4 — Returns, Risk & the Look-Ahead Trap
-
-**Domain:** Quant risk analytics.
-
-**Core Python skills:** pandas at professional level — `MultiIndex`, `align` / `reindex`, `resample`, `rolling`, `groupby().transform()`, `.shift()`, `.pct_change()`; NumPy vectorization; `np.errstate`; assertion-based data contracts; `scipy.stats` basics.
-
-**What you build:** A returns and risk library over the data from Project 3. Simple vs log returns. Resampling daily → weekly → monthly. Cross-sectional alignment of tickers with different trading calendars. Rolling volatility, annualized. Sharpe ratio. Maximum drawdown and drawdown duration. Historical VaR and parametric VaR at 95% and 99%. A correlation matrix. One clean matplotlib figure with `fig` / `ax`, as in the reference repo's project 15.
-
-**Verification hook:** Identities that must hold exactly.
-- `sum(log_returns) == log(1 + total_simple_return)`. If this fails you've mixed the two conventions somewhere.
-- Compounding daily simple returns must reproduce the price series to floating-point precision.
-- Rolling volatility annualized by `√252` must match the direct annual standard deviation on a full year, approximately — and you should be able to say what assumption makes them differ.
-
-**Planted trap:** The look-ahead bug. Compute a rolling 20-day mean and use it as a signal on the *same* bar. Then shift it by one and watch every performance number get worse. Write down both. This one bug is responsible for more fake backtest results than everything else combined, and you need to have seen the magnitude of the difference to respect it.
-
-Second trap: aligning two tickers with an outer join and forward-filling. Now a stock that didn't trade on a holiday has a "return" of zero on that day, which drags its volatility down and its Sharpe up. Inner-join instead and note what you lost.
-
-**Caveats section — this is the point of the project:** Compute the Sharpe ratio of a strategy over 6 months, then compute its standard error (roughly `√((1 + 0.5·SR²)/n)` for `n` periods). Discover that a Sharpe of 1.2 over 6 months of daily data is not statistically distinguishable from zero. This is exactly the move the reference repo makes in project 15 when it kills its own weekday effect — *"There is no Wednesday effect; there's a small sample"* — applied to a number the whole industry quotes without error bars.
-
-**Why it matters:** This is the pandas fluency employers actually check, and it's well past the Kaggle course. The look-ahead lesson is the difference between a candidate who has backtested and one who has backtested *correctly*. The Sharpe standard error argument, deployed in an interview, is a genuine signal of quantitative maturity.
-
----
-
-## Project 5 — Event-Driven Backtester
-
-**Domain:** Systematic trading. The canonical quant project.
-
-**Core Python skills:** the strategy pattern, dependency injection, `Protocol` for the strategy interface, composition, generators driving an event loop, `dataclass` events, state machines, testing hard things — fakes, stubs, `monkeypatch`, controlling time in tests.
-
-**What you build:** A bar-by-bar backtester with three separate components that don't know about each other:
-- A **data feed** — a generator yielding `Bar` events in chronological order. It physically cannot yield the future, which is what makes look-ahead structurally impossible rather than merely discouraged.
-- A **strategy** — receives a bar, emits `Order` events. Implement three: buy-and-hold, SMA crossover, and a mean-reversion rule.
-- A **broker** — receives orders, applies commission and slippage, emits `Fill` events at the *next* bar's open, not the current bar's close.
-- A **portfolio** — receives fills, tracks positions, cash, and equity curve.
-
-Then feed the equity curve into your Project 4 risk library. That reuse is the point.
-
-**Verification hook:** The best one in the whole roadmap. Run buy-and-hold through the full backtester with zero commission and zero slippage. Its total return must equal the raw price return of the asset to the cent. If it doesn't, you have a plumbing bug — off-by-one in fill timing, cash accounting error, dividend handling, position sizing rounding. This single test catches almost everything.
-
-**Planted trap:** Fill at the close of the signal bar. It's the natural thing to write and it's cheating — you decided to buy based on a price you then bought at. Compare the SMA crossover's returns under close-fill vs next-open-fill. The gap is your look-ahead premium.
-
-**Caveats section:** Your SMA crossover will probably beat buy-and-hold on some window. Before believing it: how many parameter combinations did you try? If you tested 20 window pairs and picked the best, you should expect the best of 20 random strategies to look good too. Run that experiment — 20 random entry/exit rules, take the best — and compare. That's multiple-comparisons bias, and it's why most published trading strategies don't survive contact with live money.
-
-**Why it matters:** Every quant/fintech interviewer has opinions about backtesters and will happily spend 20 minutes on yours. The architecture question — "why did you separate the broker from the strategy?" — is a real design conversation. And testing an event-driven system teaches you fakes and dependency injection in a context where they're obviously necessary rather than academic.
-
----
-
-## Project 6 — Options Pricing: Three Ways, One Answer
+## Project 3 — Options Pricing: Three Ways, One Answer
 
 **Domain:** Derivatives pricing.
 
-**Core Python skills:** NumPy broadcasting and vectorization at scale, `numpy.random.Generator`, variance reduction (antithetic and control variates), profiling with `cProfile` and `timeit`, memory-vs-speed reasoning, `multiprocessing` for CPU-bound work.
+**Core Python skills:** NumPy broadcasting and vectorization, `numpy.random.Generator`, variance reduction, chunked accumulators, keyword-only parameters, profiling with `timeit`.
 
-**What you build:** Price a European call and put three independent ways:
-1. **Closed form** — Black-Scholes.
-2. **Binomial tree** — Cox-Ross-Rubinstein, vectorized backward induction.
-3. **Monte Carlo** — vectorized GBM paths, no Python loop touching a single path.
+**What you build:** Price European calls and puts three ways: Black-Scholes closed form, a vectorized Cox-Ross-Rubinstein binomial tree, and vectorized Monte Carlo with no Python loop over paths. Then the Greeks, analytic and by finite difference (reusing Project 2's bump-and-reprice), plus a convergence study.
 
-Then Greeks: delta, gamma, vega, theta by analytic formula and again by finite difference (reusing the bump-and-reprice technique from Project 2). A convergence study for both numerical methods.
+**Verification hook:** put-call parity `C - P == S - K·e^(-rT)` for all three methods; binomial → Black-Scholes as steps grow; Monte Carlo within 4 standard errors, with error shrinking as 1/√N.
 
-**Verification hook:** Everything must converge to the same number.
-- Binomial → Black-Scholes as steps → ∞.
-- Monte Carlo → Black-Scholes as paths → ∞, with error scaling as **1/√N**. The reference repo's project 11 already established this for π — *"each error divided by the next gives ~3.1 against √10 ≈ 3.16"* — so you know exactly what table to print and what number to look for. Same law, real instrument.
-- **Put-call parity** as a free invariant: `C - P == S - K·e^(-rT)`. This holds for all three methods and catches sign errors instantly.
+**Planted trap:** Measure MC error as `abs(mean(estimates) - BS)` and overshoots cancel undershoots. Fix it with `mean(abs(...))` and confirm the 1/√N slope. **Second trap:** 10M paths × 252 steps of `float64` is 20 GB, so accumulate terminal values or chunk.
 
-**Planted trap:** Measure your Monte Carlo error as `abs(mean(estimates) - BS)`. Overshoots cancel undershoots and you'll report an error 100× smaller than reality. The reference repo made exactly this mistake twice, in projects 11 and 14, and noted afterward: *"Knowing a lesson and applying it are apparently different skills."* Make it a third time on purpose, then fix it with `mean(abs(estimates - BS))` and confirm the 1/√N slope reappears.
-
-**Second trap:** Memory. Ten million paths × 252 steps of `float64` is 20 GB. You need to either accumulate terminal values without storing paths, or chunk. The reference repo hit the small version of this in project 14 — *"Vectorization buys speed by spending memory, and once you're memory-bound it stops paying."* Here it's not a slowdown, it's a crash.
-
-**Concurrency contrast:** Monte Carlo is CPU-bound. Try `asyncio` on it (your Project 3 tool) and measure — it will not help at all. Then try `multiprocessing` and watch it scale with cores. Being able to explain the GIL with two benchmarks you personally ran is a strong interview moment.
-
-**Why it matters:** Variance reduction, convergence rates, and put-call parity are quant interview staples. More broadly: this project teaches you that a numerical answer without an error estimate is not an answer.
+**Why it matters:** A numerical answer without an error estimate isn't an answer. Known-value tests catch what self-consistency tests miss.
 
 ---
 
-## Project 7 — The Reproducible Pipeline
+## Project 4 — Credit Risk Model, Built Wrong Then Right
 
-**Domain:** Data engineering — realistically 50–60% of what an entry-level "data scientist" at a fintech actually does.
+**Domain:** Credit risk / fraud, the two largest DS functions in fintech.
 
-**Core Python skills:** pipeline orchestration in plain Python, `pyarrow` and partitioned Parquet, atomic writes and crash safety, idempotent recomputation, schema and data-contract validation (`pydantic` or `pandera`), content hashing for change detection, `pytest` with `tmp_path` fixtures, dependency-graph thinking, GitHub Actions CI.
+**Core Python skills:** pandas cleaning, scikit-learn `Pipeline` and `ColumnTransformer`, a custom transformer against the `fit`/`transform` API, time-based splits, class imbalance, calibration, bootstrap.
 
-**What you build:** A three-layer pipeline on the filesystem, each layer a directory of partitioned Parquet:
+**What you build:** A default-prediction model built **twice**. Version 1 leaks: it scales before splitting, uses random folds on time-ordered data, and includes post-outcome features. Version 2 is honest: fitting happens inside the pipeline, the split is by time, and post-outcome features are dropped. The deliverable is the writeup of the gap.
 
-- **raw/** — exactly what Project 3 fetched, untouched, append-only, never rewritten.
-- **staging/** — typed, deduplicated, timezone-normalized, with an enforced uniqueness contract on `(ticker, date)`.
-- **analytics/** — derived datasets: daily returns, rolling metrics, and the positions and equity curve from Project 5's backtest runs.
+**Verification hook:** A base-rate baseline must be beaten. Leakage is proven when the leaky model beats even an oracle built on the true risk.
 
-A single CLI entrypoint (`python -m pipeline run --layer analytics`) that resolves which upstream layers are stale and rebuilds only those. Staleness by content hash and mtime, not by "did I remember to rerun it."
+**Planted trap:** The default 0.5 threshold on a rare-positive dataset never predicts the positive class. Pick a threshold from an explicit cost assumption. Also: `Series.map` silently produces NaN for unmapped values, so validate first.
 
-Plus a validation step that **halts the pipeline** on contract violations rather than warning: no duplicate keys, no nulls in required columns, no negative volumes, no gaps longer than 5 business days, no single-day return above 50% without a corporate-action flag. A pipeline that logs a warning and continues is a pipeline that silently ships bad numbers.
-
-**Verification hook:** The pipeline's analytics layer must reproduce your Project 4 in-memory pandas results row-for-row within floating-point tolerance. Two independent paths to the same number is evidence; one path is a guess. Add it as a test.
-
-**Planted trap:** Run the pipeline twice without dedup-on-write and watch your row count double while every downstream metric silently halves or doubles — no error, no traceback, just wrong. Then fix it and add a test that runs the pipeline twice and asserts row counts are stable. Same idempotency lesson as Project 3, but here it propagates through three layers before you see it, which is exactly how it happens in real life.
-
-**Second trap:** Partial writes across a multi-file layer. Kill the process halfway through writing the analytics layer and you get three of five partitions updated — a dataset that loads fine and is internally inconsistent. Write to a staging directory and atomically swap, so a layer is either fully old or fully new.
-
-**Third trap:** Schema drift. Add a column upstream and watch a downstream `select` silently pick up or drop it. Pin an explicit schema at each boundary and fail on mismatch.
-
-**Why it matters:** Every production pipeline gets rerun, gets killed mid-run, and gets a schema change it wasn't expecting. Handling all three is the difference between a script and a system, and it's the actual content of most junior data work. "I built a three-layer pipeline with data contracts, atomic writes, and idempotent recomputation" is a materially different conversation than "I've used pandas."
-
-**Set up CI here:** GitHub Actions running `ruff`, `mypy`, and `pytest` on every push, across all projects to date. If earlier projects fail, fix them. Green CI on a personal repo is rare enough among juniors to be a signal.
-
-**Scope warning:** This is the tightest project in the roadmap. If you're running over, cut the analytics layer to two datasets. Do not cut the validation step or the idempotency work — those *are* the project.
+**Caveats section:** Bootstrap a confidence interval on the model-vs-baseline AUC gap, and check calibration with a reliability curve.
 
 ---
 
-## Project 8 — Credit Risk Model, Built Wrong Then Right
+## Project 5 — Async Market Data Ingestor
 
-**Domain:** Credit risk / fraud detection — the two largest data science functions in fintech.
+**Domain:** Market data plumbing, which is genuinely what a junior engineer does in month one at a fintech.
 
-**Core Python skills:** scikit-learn `Pipeline` and `ColumnTransformer`, writing a custom transformer against the `fit`/`transform` API (your Project 1–2 OOP paying off), `TimeSeriesSplit` and `GroupKFold`, class imbalance handling, probability calibration, `joblib` serialization, reproducibility discipline.
+**Core Python skills:** generators and `yield`, the iterator protocol, `itertools`, `async` / `await`, `asyncio.gather`, `asyncio.Semaphore` for rate limiting, `httpx.AsyncClient`, exponential backoff with jitter (as a decorator, a callback to Project 2), `argparse` or `typer`, the `logging` module, `pathlib`, environment-based secrets, `time.perf_counter` benchmarking.
 
-**What you build:** A default-prediction model on a public lending dataset (Lending Club) or a fraud dataset (the Kaggle credit card fraud set). Build it **twice**:
+**What you build:** A CLI that pulls daily OHLCV bars for a list of tickers from a free public API, writes them to partitioned Parquet, and is **resumable and idempotent**. Run it twice and nothing changes. Kill it halfway and a rerun completes the job without re-fetching what it already has.
 
-**Version 1 — leaking.** Do the natural thing. Scale the features, then split. Use a random `KFold` on time-ordered data. Include features like `recoveries` or `last_payment_amount` that only exist *after* default is known. Impute missing values using the full dataset's mean. Report your AUC. It will be excellent.
+`python -m ingest --tickers AAPL,MSFT,SPY --start 2015-01-01 --out data/`
 
-**Version 2 — honest.** Fit the scaler inside the pipeline inside the fold. Split by time. Drop the post-outcome features. Report your AUC. It will be much worse.
+**Verification hook:**
+- **Idempotency:** run twice, diff the output. It should be byte-identical with zero duplicate `(ticker, date)` pairs. Assert this in a test.
+- **Concurrency payoff:** benchmark sequential vs async across 5 / 20 / 50 tickers. Take `min()` of 3 runs. Speedup should scale until you hit the semaphore limit, then flatten. Explain the flattening.
 
-The deliverable is the writeup of the gap.
+**GIL contrast:** Run your Project 3 Monte Carlo pricer under `asyncio` (no speedup) and under `multiprocessing` (scales with cores). Put that table next to the ingest benchmark: I/O-bound → async wins; CPU-bound → only processes help. Two benchmarks you ran yourself are the best answer to "when does asyncio help?"
 
-**Verification hook:** A baseline that must be beaten. Predict the base rate for everyone and compute the log loss and PR-AUC. Any model that doesn't beat that is worthless regardless of its accuracy. On a 1%-default dataset, a model that predicts "no default" for everyone has 99% accuracy — say this in your README and never quote accuracy on imbalanced data again.
+**Planted traps (all silent):**
+- Timezone-naive timestamps. Normalize to UTC on ingest, or you'll discover the problem in Project 6 when your correlations are garbage.
+- Adjusted vs unadjusted close. A 7-for-1 split looks like an 86% crash in unadjusted prices.
+- Partial writes. A truncated file reads fine and is wrong. Write to a temp path and atomically rename.
 
-**Planted trap:** Beyond the leakage, use the default 0.5 classification threshold on a 1%-positive dataset and get a model that never predicts the positive class. Then plot precision and recall against threshold and pick one based on an actual cost assumption — what does a missed default cost vs a rejected good customer?
-
-**Caveats section:** Your honest model beats logistic regression baseline by 0.02 AUC. Bootstrap the test set 1000 times and get a confidence interval on that gap. Is it distinguishable from zero? Also: check calibration with a reliability curve. A model with great ranking (AUC) and terrible calibration is useless for credit pricing, where you need the actual probability to set an interest rate — this distinction is a genuinely differentiating thing to understand.
-
-**Why it matters:** "Tell me about a time your model was too good" is a question that separates people who've deployed models from people who've entered competitions. You'll have a written, quantified answer. Leakage is the number one cause of models that work in the notebook and fail in production, and every DS interviewer probes for it.
+**Stretch:** `--dry-run` and structured JSON logging.
 
 ---
 
-## Project 9 — Capstone: Ship the Whole Thing
+## Project 6 — Returns, Risk & the Look-Ahead Trap
 
-**Domain:** Everything, under production constraints.
+**Domain:** Quant risk analytics.
 
-**Core Python skills:** src-layout packaging, configuration management, FastAPI + Pydantic v2, HTTP semantics and error handling across boundaries, Docker, dependency pinning, structured logging, documentation.
+**Core Python skills:** pandas at professional level: `MultiIndex`, `align` / `reindex`, `resample`, `rolling`, `groupby().transform()`, `.shift()`, `.pct_change()`, NumPy vectorization, `np.errstate`, assertion-based data contracts, `scipy.stats` basics.
 
-**What you build:** One deployed system that wires together everything above:
+**What you build:** A returns and risk library over Project 5's data. It covers simple vs log returns, daily → weekly → monthly resampling, cross-sectional alignment across trading calendars, rolling annualized volatility, Sharpe, max drawdown and drawdown duration, historical and parametric VaR at 95%/99%, a correlation matrix, and one clean `fig`/`ax` matplotlib figure.
+
+**Verification hook:**
+- `sum(log_returns) == log(1 + total_simple_return)`.
+- Compounding daily simple returns reproduces the price series to floating-point precision.
+- Rolling vol × √252 ≈ direct annual std. Say what assumption makes them differ.
+
+**Planted trap:** Use a rolling 20-day mean as a signal on the *same* bar, then shift it by one and watch every number get worse. Record both. Second trap: outer-join + forward-fill two tickers, so holidays become zero returns that drag vol down and Sharpe up.
+
+**Caveats section:** Compute the Sharpe standard error `√((1 + 0.5·SR²)/n)` and show that a Sharpe of 1.2 over 6 months of daily data is not distinguishable from zero. This is the closed-form counterpart to Project 4's bootstrap.
+
+---
+
+## Project 7 — Event-Driven Backtester
+
+**Domain:** Systematic trading.
+
+**Core Python skills:** strategy pattern, dependency injection, `Protocol` for the strategy interface (reuse the Project 2 reasoning), generators driving an event loop, `dataclass` events, state machines, fakes/stubs/`monkeypatch`, controlling time in tests.
+
+**What you build:** A bar-by-bar backtester made of four components that don't know about each other:
+- **Data feed:** a generator yielding `Bar` events. It physically cannot yield the future.
+- **Strategy:** bar in, `Order` out. Implement buy-and-hold, SMA crossover, and mean reversion.
+- **Broker:** applies commission and slippage and fills at the *next* bar's open.
+- **Portfolio:** tracks positions, cash, and the equity curve. Consider reusing the Project 1 ledger for cash/position postings; the zero-sum invariant becomes a free check.
+
+Feed the equity curve into the Project 6 risk library.
+
+**Verification hook:** Buy-and-hold with zero costs must equal the asset's raw price return to the cent.
+
+**Planted trap:** Fill at the signal bar's close and measure the gap vs next-open fills. That gap is your look-ahead premium.
+
+**Caveats section:** Multiple comparisons. Test 20 random entry/exit rules, take the best, and compare it to your "best" SMA pair.
+
+---
+
+## Project 8 — The Reproducible Pipeline
+
+**Domain:** Data engineering, realistically 50–60% of an entry-level fintech DS job.
+
+**Core Python skills:** plain-Python orchestration, `pyarrow` and partitioned Parquet, atomic writes, idempotent recomputation, `pydantic`/`pandera` contracts, content hashing, `tmp_path` fixtures, dependency-graph thinking, GitHub Actions CI.
+
+**What you build:** `raw/` (Project 5 output, append-only) → `staging/` (typed, deduped, UTC, unique on `(ticker, date)`) → `analytics/` (returns, rolling metrics, Project 7 equity curves). `python -m pipeline run --layer analytics` rebuilds only stale layers, judged by content hash. Validation **halts** on violations: duplicate keys, nulls in required columns, negative volumes, gaps over 5 business days, or a >50% one-day return with no corporate-action flag.
+
+**Build it generic:** Write the layer/contract machinery so it doesn't know it's handling stock prices. The capstone reuses it unchanged for a second dataset, which is the real test of whether the abstraction is right.
+
+**Verification hook:** The analytics layer reproduces Project 6's in-memory results row-for-row within tolerance.
+
+**Planted traps:** double rows from a rerun without dedup, a half-written multi-partition layer (fix by writing to a staging directory and atomically swapping), and schema drift (fix by pinning a schema at each boundary).
+
+**Set up CI here:** `ruff`, `mypy`, and `pytest` across all projects so far. Fix whatever's red.
+
+**Scope warning:** If you're running over, cut analytics to two datasets. Never cut validation or idempotency.
+
+---
+
+## Project 9 — Capstone: The Zetamac Performance Lab
+
+**Domain:** Everything, applied to a dataset you generated yourself and understand better than anyone.
+
+**Framing question:** *Am I actually getting better at mental arithmetic, how fast, and how much of what I see is just noise?*
+
+You've been running 5 Zetamac trials a day. That's a small, messy, personal time series with a real learning signal and a lot of noise, which makes it a better capstone dataset than stock prices. You can't Google the answer, and every technique from Projects 1–8 has a natural job to do on it.
+
+### The data
+
+**Assumed raw schema. Adjust to match your file before starting:**
+
+| Column | Type | Notes |
+|---|---|---|
+| `date` | date | local practice date |
+| `trial` | int 1–5 | order within the day |
+| `score` | int ≥ 0 | Zetamac score (default 120s, default settings) |
+| `time` *(optional)* | time | start time, which enables time-of-day analysis |
+| `settings` *(optional)* | str | only needed if you ever changed the duration or ranges |
+
+That means 5 rows per day. Missed days are missing rows, not zeros.
+
+### What you build
 
 ```
-scheduled ingest (P3) → warehouse (P7) → risk & signals (P4, P5) → API (new) → dashboard
+zetamac.csv → pipeline (P8) → analytics & model (P4, P6) → "strategy" backtest (P7) → API → dashboard
 ```
 
-- A FastAPI service with endpoints for portfolio valuation (P2), risk metrics (P4), and backtest results (P5), all Pydantic-validated, with real status codes and error responses.
-- A thin Streamlit dashboard consuming the API — not reaching into the database directly. The separation is deliberate and interviewers notice it.
-- Dockerized, `docker compose up` and it runs.
-- CI running lint, types, and the full test suite.
-- A README that a stranger can follow to a working system in under five minutes.
+1. **Ingest (P5 patterns):** A loader that validates and appends the CSV to `raw/` idempotently. Re-importing the same file changes nothing, and a corrected row for an existing `(date, trial)` is handled explicitly (rejected or versioned; you decide and write it down). No async needed; the lesson is idempotency, not concurrency.
 
-**Verification hook:** A smoke test in CI that spins up the container, hits every endpoint, and asserts the responses are well-formed. Plus: the API's reported portfolio value must equal the value computed directly from your Project 2 pricing library. Same number, two paths.
+2. **Pipeline (P8, reused unchanged):** A new set of contracts: unique `(date, trial)`, `trial ∈ 1..5`, `score ≥ 0`, no future dates, at most 5 trials per day. A score more than ~40 away from the rolling median gets flagged, not dropped. It's either a typo or a real breakthrough, and the pipeline shouldn't decide which.
 
-**Why it matters:** This is your portfolio centerpiece and the thing you send with applications. Almost every junior candidate has notebooks. Very few have a containerized service with a test suite and CI. The gap between those two is roughly the gap between "we'll keep your résumé on file" and an onsite.
+3. **Analytics (P6):** Treat your daily score as a price series.
+   - Daily mean, max, and within-day std. The warm-up curve is the mean score by trial number 1→5.
+   - Rolling 7- and 28-day means, and "daily return" = change in rolling mean.
+   - **Drawdowns:** the longest stretch below your previous personal best, and max drawdown from peak rolling mean. A plateau is a drawdown.
+   - **Volatility:** has your day-to-day consistency improved, even where the mean hasn't?
 
-**Scope warning:** This is a 2-day project only if you resist adding features. Three endpoints, one dashboard page, one Dockerfile. The value is in it being *complete*, not in it being large.
+4. **Learning-curve model (P4 discipline):** Fit a learning curve (log-linear, or a power law `score = a·n^b` over cumulative trials `n`) and forecast.
+   - **Time split only.** Train on the first ~80% of days and evaluate on the rest. A random split leaks the future exactly like Project 4's V1.
+   - **Baseline that must be beaten:** "tomorrow = trailing 7-day mean." If the curve can't beat that, it isn't modelling learning.
+   - Bootstrap the forecast error (resample *days*, not trials, since the 5 trials in a day aren't independent).
+
+5. **Monte Carlo forecast (P3):** Simulate future daily scores from fitted trend + residual noise to answer "when do I hit 60 (or your next milestone)?" as a distribution, not a date. Report the median and a 90% interval, and check that the MC error shrinks as 1/√N.
+
+6. **Practice "strategies" (P7, lightly):** The backtester's feed → strategy → result shape, applied to a question you can act on. Compare decision rules like *best-of-5*, *mean-of-5*, and *mean of trials 3–5 (post warm-up)* as your "daily score" metric, and ask which one tracks true skill most stably. Low noise with the same trend is the win. Keep it to one module; don't port the whole engine.
+
+7. **API + dashboard (new):** FastAPI with ~3 Pydantic-validated endpoints: `GET /summary` (PB, streak, rolling means), `GET /forecast?target=60`, and `POST /sessions` (log today's 5 trials, which go through the same contracts). A single-page Streamlit dashboard that talks only to the API, never to the Parquet files.
+
+8. **Ship:** `docker compose up` runs it. CI runs lint, types, tests, and a container smoke test. The README gets a stranger to a working system in under 5 minutes, and includes a bundled sample CSV so it runs without your personal data.
+
+### Verification hooks
+
+- **Two paths to one number:** the daily mean from the API == the mean computed directly from the raw CSV with plain pandas, for every day.
+- **Conservation:** row count in `raw/` == 5 × days practiced (minus any documented partial days), and it's unchanged after re-importing the same file.
+- **Known-answer model test:** generate synthetic data from a known power law plus noise and confirm the fit recovers `a` and `b` within tolerance before trusting it on your real data. This is the Project 3 lesson: self-consistency isn't enough.
+
+### Planted traps
+
+- **The warm-up trap:** Trial 1 is systematically lower. If you ever log fewer than 5 trials on a day, the daily *mean* drops for reasons unrelated to skill. Detect it by comparing within-trial-number means, and fix the metric rather than the data.
+- **Autocorrelated trials:** Treating 5 trials/day × N days as 5N independent observations shrinks every confidence interval by ~√5. Bootstrap by day and watch your intervals widen.
+- **Personal-best look-ahead:** "Days since PB" computed with a whole-series `max()` instead of `cummax()` uses future information. It's the same bug as Project 6's rolling signal, just in a costume.
+- **Missing days as zeros:** Resampling to a daily calendar and filling gaps with 0 invents catastrophic sessions. Leave them missing and let rolling windows use `min_periods`.
+
+### Caveats section (the point of the capstone)
+
+- **Is the improvement real?** Estimate the slope with a confidence interval. Over a short window, a "+3 points" gain may not be distinguishable from noise, which is exactly Project 6's Sharpe argument applied to you.
+- **Day-of-week / time-of-day effect:** You'll find one. Then compute its standard error and see if it survives. (The reference repo's "There is no Wednesday effect; there's a small sample" was written for this moment.)
+- **Selection:** If you skipped practice on bad days, your data overstates your skill. Say so, even if you can't fix it.
+- **Regime changes:** A new strategy (e.g., a different multiplication trick) is a structural break. A single learning curve across it is the wrong model.
+
+### Scope warning
+
+Two sittings only if you resist features. That means one CSV, three endpoints, one dashboard page, and one Dockerfile. Parts 5 and 6 are the first cuts if you're over time. Never cut the contracts, the time split, or the Caveats section.
 
 ---
 
-# Pace and Timeline
+# Pace
 
 Assuming ~3 hours/day, 5 days/week:
 
 | Week | Projects | Theme |
 |---|---|---|
-| 1 | P1, P2 + slack day | OOP, money, testing, valuation |
-| 2 | P3, P4 | I/O, concurrency, pandas at depth |
-| 3 | P5, P6 | Architecture, numerical methods |
-| 4 | P7, P8 | SQL/engineering, ML discipline |
-| 5 | P9 + consolidation | Ship, then write everything up |
+| 1 | P1, P2 | OOP, money, testing, valuation |
+| 2 | P3, P4 | Numerical methods, ML discipline |
+| 3 | P5, P6 | I/O, concurrency, pandas at depth |
+| 4 | P7, P8 | Architecture, pipeline engineering, CI |
+| 5 | P9 | Ship the Zetamac Lab |
 
-**About 5 weeks, ~55 hours.** That is aggressive but not fantasy, with two conditions:
+About 5 weeks, ~55 hours, plus one unallocated slack day per week.
 
-- **Slack days are load-bearing.** One per week, unallocated. You will overrun somewhere. If you don't, use it to go back and improve the weakest README.
-- **P7 and P9 are the ones that will overrun.** They're the least "algorithmic" and the most fiddly-tooling, which is exactly why they're valuable and exactly why they take longer than they look.
+Keep logging Zetamac daily throughout. Every extra week of data makes the capstone's caveats more interesting and its intervals tighter.
 
-If you have 6 weeks, add a week between P6 and P7 to go back and retrofit type hints and missing tests across P1–P6, and to do a genuine refactoring pass. Code you wrote three weeks ago and now find embarrassing is the strongest evidence you're learning.
-
-## Scope discipline
-
-The failure mode for this roadmap is not difficulty, it's scope creep. Rules:
-
-- **Ship Core, then stop.** Stretch goals are for when Core landed in 4 hours, not for when you're excited.
-- **No new libraries mid-project.** If you find yourself evaluating three charting libraries on day 2, you've lost the thread.
-- **The README is part of the deliverable, not a chore after it.** Budget 30 minutes. A project without its Findings and Caveats sections isn't finished.
-- **If you're 2 hours over on day 2, cut a feature, not the tests.** The tests are the transferable skill; the feature isn't.
+**Scope discipline:** Ship Core, then stop. Don't add new libraries mid-project. The README is part of the deliverable. If you're 2 hours over, cut a feature, not the tests.
 
 ---
 
-# How this maps to the entry-level hiring bar
-
-**The screen** — Most entry-level fintech/DS screens filter on three things: can you write Python that isn't a notebook, do you know SQL, and have you ever been responsible for something being correct. P1 (tests, types, packaging), P7 (SQL, warehouse, CI), and the verification-hook discipline throughout hit all three directly.
-
-**The technical interview** — These aren't LeetCode prep and shouldn't be. But the coding round at fintech firms is disproportionately about data structures under a domain constraint, and the design round is about tradeoffs. Specific things you'll be able to answer from experience rather than memory:
+# How this maps to the hiring bar
 
 | Question | Comes from |
 |---|---|
 | How do you store monetary amounts? | P1 |
-| ABC vs Protocol? Inheritance vs composition? | P2, P5 |
-| When does `asyncio` help? What's the GIL's role? | P3 + P6 benchmarks |
-| How do you avoid look-ahead bias? | P4, P5 (structurally, via the generator feed) |
-| Walk me through your backtester's architecture. | P5 |
-| Why does Monte Carlo error scale as 1/√N? | P6 |
-| Write a query for a 30-day rolling average per ticker. | P7 |
-| How do you detect leakage? | P8 |
-| Your model got 99% accuracy — is that good? | P8 |
+| ABC vs Protocol? Inheritance vs composition? | P2, P7 |
+| Why does Monte Carlo error scale as 1/√N? | P3 |
+| How do you detect leakage? Your model got 99% accuracy, is that good? | P4 |
+| When does `asyncio` help? What's the GIL's role? | P5 (both benchmarks) |
+| How do you avoid look-ahead bias? | P6, P7, P9 |
+| Walk me through your backtester's architecture. | P7 |
+| Your pipeline died halfway through. What happens on rerun? | P8 |
+| Tell me about an end-to-end project you own. | P9: your own data, your own question, deployed |
 
-**The behavioral / project conversation** — This is where the reference repo's format is quietly the most valuable thing in this document. The Learning Log gives you a written record of specific bugs you caused, diagnosed, and fixed. "Tell me about a difficult bug" is nearly universal and most juniors answer it with something generic. You'll have fifteen candidates, each with a mechanism and a fix.
-
-**Day-one readiness** — What junior engineers at fintechs actually do in month one: fix a pipeline that broke overnight, add a column to a report, write a test for someone else's code, investigate why two systems disagree about a number. That last one is the entire job, and the verification-hook habit — *always compute it two ways* — is the exact instinct it requires. P3's idempotency work and P7's data contracts are the other two.
-
-**What this roadmap deliberately doesn't cover** — LeetCode-style algorithms (do these separately, ~30 min/day if your targets do algorithmic rounds), deep learning (not what entry-level fintech DS work looks like), and Kubernetes/infra beyond Docker. Adding any of them would dilute the rest.
-
----
+The capstone is also a good conversation opener. "I built a system that tracks and forecasts my own mental-math training, and here's why the day-of-week effect I found isn't real" shows quant instinct, engineering, and honesty in a single sentence.
 
 # A note on honest self-assessment
 
-The single best thing in the reference repo is its willingness to demolish its own results. Project 15 finds two effects and dissolves both: *"Two findings, both dissolved on inspection."* Project 11 catches its own error-averaging mistake and admits project 14 repeated it.
-
-That habit is rarer and more valuable than any library on this list. It's what separates an analyst whose numbers you can trust from one whose numbers you have to check. Every Caveats section you write is practice for the moment in an interview when someone asks "how confident are you in that?" and the honest answer is "less than the number suggests, and here's why."
-
-Carry it forward.
+Report the number, then attack it. The capstone is the hardest place to do this, because the data is about you and you'll want the improvement to be real. That's exactly why it's the right final exam.

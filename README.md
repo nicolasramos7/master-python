@@ -27,16 +27,4 @@ uv run ruff check .
 | 3 | [03-options-pricing](03-options-pricing/) | 2026-09-24 | NumPy broadcasting and slicing, `numpy.random.Generator`, chunked accumulators, keyword-only parameters | Put-call parity; binomial → Black-Scholes at 5,000 steps; Monte Carlo within 4 standard errors; the 1/√N slope | Every bug was silent: `(r + σ²)/2` instead of `r + σ²/2` cost 0.1%, and only the known-value test caught it — the self-consistency tests all agreed on the wrong number. The tree converges as 1/n and Monte Carlo as 1/√n, so matching a 10,000-step tree would take ~10^10 paths. |
 | 4 | Credit Risk Model | 2026-09-28 | pandas cleaning, sklearn `fit`/`transform`, `Pipeline`, `ColumnTransformer`, broadcasting, bootstrap | Leaky model (AUC 1.00) beats the oracle (0.76); honest model (0.75) can't | `Series.map` silently NaNs anything not in the dict — validate with `.isin` first |
 
-## Roadmap
-
-1. **Double-Entry Ledger** - OOP, dataclasses, money representation, pytest
-2. **Fixed Income Pricing Engine** - ABCs vs Protocols, decorators, context managers
-3. **Async Market Data Ingestor** - generators, async/await, idempotency
-4. Pending
-5. Pending
-6. Pending
-7. **Data Pipeline** - layered storage, data contracts, CI
-8. **Credit Risk Model** - sklearn pipelines, leakage discipline
-9. **Capstone** - API, dashboard, Docker
-
 See [python-fintech-roadmap.md](python-fintech-roadmap.md) for full project specs.
