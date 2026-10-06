@@ -1,0 +1,49 @@
+[project]
+name = "market-data-ingestor"
+version = "0.1.0"
+description = "Project 5 - an async, resumable, idempotent market data ingestor"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "httpx>=0.28.1",
+    "pandas>=3.0.6",
+    "pyarrow>=25.0.1",
+]
+
+[build-system]
+requires = ["uv_build>=0.8.17,<0.9.0"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+# The distribution is called market-data-ingestor, but the import name is
+# `ingest`, so the roadmap's `python -m ingest` works.
+module-name = "ingest"
+
+[dependency-groups]
+dev = [
+    "mypy>=2.3.1",
+    "pandas-stubs>=3.0.5.260914",
+    "pytest>=9.1.1",
+    "ruff>=0.16.9",
+]
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "UP", "B", "SIM", "PD", "ASYNC", "PTH", "RUF"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["ingest", "conftest"]
+
+[tool.mypy]
+strict = true
+files = ["src", "tests"]
+# Point mypy at the project venv so `uv run mypy` sees httpx and pandas.
+python_executable = ".venv/bin/python"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# Until backoff.py works, importing client.py fails and four test files can't
+# even be collected. Report those as errors, but keep going and run the rest.
+addopts = "--continue-on-collection-errors"
